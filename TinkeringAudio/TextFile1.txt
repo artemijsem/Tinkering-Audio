@@ -1,0 +1,37 @@
+float lerp(float v0, float v1, float t)
+        {
+            return (1 - t) * v0 + t * v1;
+        }
+        private List<int> ADSR_Envelops(List<int> sample, float attack_lvl, float attack_time, float decay_time, float sustain_lvl, float sustain_time, float release_time)
+        {
+            int samples = sample.Count();
+            int attack_length = (int)(samples * attack_time);
+            int decay_length = (int)(samples * decay_time);
+            int sustain_length = (int)(samples * sustain_time);
+            int release_length = (int)(samples * release_time);
+            int progress = 0;
+            for (int i = 0; i < attack_length; i++)
+            {
+                //sample[i] *= (int)(0 + (attack_lvl - 0) * (float)(progress / attack_length));
+                sample[i] *= (int)lerp(0, attack_lvl, progress / attack_length);
+            }
+            for (int i = attack_length; i < attack_length + decay_length; i++)
+            {
+                //sample[i] *= (attack_length + (sustain_length - attack_length) * (progress / decay_length));
+                sample[i] *= (int)lerp(attack_length, sustain_length, progress / decay_length);
+            }
+            for (int i = attack_length + decay_length; i < attack_length + decay_length + sustain_length - 10; i++)
+            {
+                sample[i] *= (int)sustain_lvl;
+            }
+            for (int i = attack_length + decay_length + sustain_length; i < attack_length + decay_length + sustain_length + release_length; i++)
+            {
+                //sample[i] *= (sustain_lvl + (0 - sustain_lvl) * (progress / decay_length));
+                sample[i] *= (int)lerp(sustain_lvl, 0, progress / decay_length);
+            }
+            for (int i = attack_length + decay_length + sustain_length + release_length; i < samples; i++)
+            {
+                sample[i] *= 0;
+            }
+            return sample;
+        }
